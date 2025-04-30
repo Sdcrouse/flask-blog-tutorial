@@ -38,3 +38,11 @@ def test_author_required(app, client, auth):
     
     # Current user doesn't see the edit link
     assert b'href="/1/update"' not in client.get('/').data
+
+@pytest.mark.parametrize('path', (
+    '/2/update',
+    '/2/delete',
+))
+def test_blog_exists_required(client, auth, path):
+    auth.login()
+    assert client.post(path).status_code == 404
