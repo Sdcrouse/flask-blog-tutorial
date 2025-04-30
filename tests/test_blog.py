@@ -22,3 +22,19 @@ def test_index(client, auth):
 def test_login_required(client, path):
     response = client.post(path)
     assert response.headers["Location"] == "/auth/login"
+
+def test_author_required(app, client, auth):
+    # Change the post author to another user
+    with app.app_context():
+        db = get_db()
+        db.execute('UPDATE post SET author_id = 2 WHERE id = 1')
+        db.commit()
+
+    auth.login()
+    
+    # Current user can't modify or delete another user's post
+    assert client.post('/1/update').status_code == 403
+    assert client.post('/1/delete').status_code == 403
+    
+    # Current user doesn't see the edit link
+    assert b'href="/1/update"' not in client.get('/').data
