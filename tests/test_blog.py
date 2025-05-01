@@ -68,7 +68,10 @@ def test_create(client, auth, app):
 
 def test_update(client, auth, app):
     auth.login()
-    assert client.get('/1/update').status_code == 200
+    response = client.get('/1/update')
+    assert response.status_code == 200
+    assert b'test title' in response.data
+    assert b'test\nbody' in response.data
     
     response = client.post('/1/update', data ={'title': 'updated', 'body': ''})
     assert response.headers["Location"] == "/"
